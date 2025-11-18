@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>재호의 회원가입 / 로그인</title>
+
+  <!-- Google Fonts: Roboto -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* =========================
+       공통 폰트
+       ========================= */
+    * {
+      box-sizing: border-box;
+      font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================
+       영상 배경 + 전체 레이아웃
+       ========================= */
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #202124;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 움직이는 영상 배경 */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+    }
+
+    .video-bg video {
+      min-width: 100%;
+      min-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.45) blur(1px);
+      transform: scale(1.03);
+    }
+
+    /* 살짝 어두운 오버레이 (텍스트 가독성 ↑) */
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(0,0,0,0.4), rgba(0,0,0,0.65));
+      z-index: -1;
+    }
+
+    /* =========================
+       메인 컨테이너 (카드 레이아웃)
+       ========================= */
+    .auth-wrapper {
+      width: 100%;
+      max-width: 960px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        0 1px 3px rgba(60, 64, 67, 0.25);
+      border: 1px solid rgba(218, 220, 224, 0.9);
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .auth-wrapper:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 14px 40px rgba(0, 0, 0, 0.45),
+        0 1px 3px rgba(60, 64, 67, 0.25);
+    }
+
+    /* =========================
+       왼쪽 인트로 영역
+       ========================= */
+    .auth-intro {
+      padding: 32px 32px 28px;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: linear-gradient(135deg, rgba(232, 240, 254, 0.96) 0,
+                                         rgba(255, 255, 255, 0.96) 40%,
+                                         rgba(241, 243, 244, 0.96) 100%);
+    }
+
+    .logo-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .logo-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      color: #1a73e8;
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
+    }
+
+    .logo-dots {
+      display: flex;
+      gap: 3px;
+    }
+
+    .logo-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .logo-dot.blue   { background: #1a73e8; }
+    .logo-dot.red    { background: #ea4335; }
+    .logo-dot.yellow { background: #fbbc04; }
+    .logo-dot.green  { background: #34a853; }
+
+    .logo-text {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5f6368;
+    }
+
+    .auth-intro-top h1 {
+      margin: 6px 0 8px;
+      font-size: 24px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .auth-intro-top p {
+      margin: 2px 0;
+      font-size: 13px;
+      color: #5f6368;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e8f0fe;
+      color: #1967d2;
+      font-size: 11px;
+      margin-top: 12px;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
+    }
+
+    .auth-intro-bottom {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+
+    .auth-intro-bottom strong {
+      color: #202124;
+    }
+
+    /* =========================
+       오른쪽 폼 영역
+       ========================= */
+    .auth-main {
+      padding: 24px 28px 20px;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.98);
+    }
+
+    /* 탭 (로그인 / 회원가입) */
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      background: #f1f3f4;
+      padding: 3px;
+      border-radius: 999px;
+      border: 1px solid #dadce0;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 7px 0;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #5f6368;
+      border: none;
+      background: transparent;
+      transition:
+        background 0.2s,
+        color 0.2s,
+        transform 0.1s,
+        box-shadow 0.15s;
+      user-select: none;
+    }
+
+    .auth-tab.active {
+      background: #ffffff;
+      color: #1a73e8;
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.25);
+      transform: translateY(-0.5px);
+    }
+
+    .auth-tab:not(.active):hover {
+      background: #e8eaed;
+    }
+
+    .auth-tab:active {
+      transform: scale(0.97) translateY(0.5px);
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+
+    form {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    form.active {
+      display: flex;
+    }
+
+    .form-header {
+      margin: 4px 0 10px;
+    }
+
+    .form-header h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .form-header p {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+
+    .field-label {
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 4px;
+      border: 1px solid #dadce0;
+      background: #ffffff;
+      color: #202124;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s, background 0.18s, transform 0.08s;
+    }
+
+    input::placeholder {
+      color: #9aa0a6;
+    }
+
+    input:focus {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 1px #1a73e8;
+      background: #ffffff;
+      transform: translateY(-0.5px);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #5f6368;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      transition: transform 0.08s, color 0.15s;
+    }
+
+    .toggle-password:hover {
+      color: #202124;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .toggle-password:active {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .error-text {
+      font-size: 11px;
+      color: #d93025;
+      min-height: 14px;
+    }
+
+    .hint-text {
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .success-text {
+      font-size: 11px;
+      color: #188038;
+      min-height: 14px;
+    }
+
+    .auth-actions {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* 버튼 눌렀을 때 진동 느낌 */
+    @keyframes pulse-press {
+      0%   { transform: translateY(0) scale(1); }
+      50%  { transform: translateY(1px) scale(0.97); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .btn-main {
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: #1a73e8;
+      color: #ffffff;
+      transition:
+        background 0.15s,
+        box-shadow 0.15s,
+        transform 0.08s;
+      box-shadow: 0 2px 4px rgba(60, 64, 67, 0.35);
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-main:hover {
+      background: #185abc;
+      box-shadow: 0 3px 6px rgba(60, 64, 67, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-main:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3);
+    }
+
+    .btn-main.pressed {
+      animation: pulse-press 0.16s ease-out;
+    }
+
+    /* 로딩 스피너 */
+    .btn-main .spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5);
+      border-top-color: #ffffff;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    .btn-main.loading .spinner {
+      display: inline-block;
+    }
+
+    .btn-main.loading .btn-label {
+      opacity: 0.7;
+    }
+
+    .btn-main.loading {
+      cursor: default;
+      background: #185abc;
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.35);
+      transform: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .btn-main[disabled] {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .auth-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .auth-options label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: #5f6368;
+      user-select: none;
+    }
+
+    .auth-options a {
+      color: #1a73e8;
+      text-decoration: none;
+      font-size: 12px;
+      transition: color 0.15s, transform 0.08s;
+    }
+
+    .auth-options a:hover {
+      text-decoration: underline;
+      color: #174ea6;
+      transform: translateY(-0.5px);
+    }
+
+    .auth-options a:active {
+      transform: translateY(0.5px);
+    }
+
+    .social-row {
+      margin-top: 4px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-social {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px solid #dadce0;
+      background: #ffffff;
+      color: #3c4043;
+      font-size: 12px;
+      padding: 8px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition:
+        background 0.15s,
+        box-shadow 0.15s,
+        transform 0.08s;
+      user-select: none;
+    }
+
+    .btn-social:hover {
+      background: #f8f9fa;
+      box-shadow: 0 2px 4px rgba(60, 64, 67, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-social:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.25);
+    }
+
+    .small-footer {
+      margin-top: auto;
+      font-size: 11px;
+      color: #80868b;
+      text-align: right;
+    }
+
+    /* 이메일 인증 UI */
+    .verify-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .verify-row .btn-sub {
+      border-radius: 6px;
+      border: 1px solid #dadce0;
+      padding: 8px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #f8f9fa;
+      color: #1a73e8;
+      white-space: nowrap;
+      transition:
+        background 0.15s,
+        box-shadow 0.15s,
+        transform 0.08s;
+      user-select: none;
+    }
+
+    .verify-row .btn-sub:hover {
+      background: #e8f0fe;
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .verify-row .btn-sub:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.25);
+    }
+
+    .verify-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #5f6368;
+      min-height: 16px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .verify-timer {
+      color: #ea8600;
+    }
+
+    /* 비밀번호 강도 표시 */
+    .password-strength {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .strength-bar-wrapper {
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: #e0e0e0;
+      overflow: hidden;
+    }
+
+    .strength-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      transition: width 0.2s, background 0.2s;
+    }
+
+    /* 비밀번호 재설정 박스 */
+    .reset-panel {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f8f9fa;
+      border: 1px solid #dadce0;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .reset-panel.active {
+      display: flex;
+    }
+
+    .reset-panel .btn-sub {
+      align-self: flex-end;
+      border-radius: 6px;
+      border: 1px solid #dadce0;
+      padding: 7px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #e8f0fe;
+      color: #1a73e8;
+      white-space: nowrap;
+      transition:
+        background 0.15s,
+        box-shadow 0.15s,
+        transform 0.08s;
+      user-select: none;
+    }
+
+    .reset-panel .btn-sub:hover {
+      background: #d2e3fc;
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .reset-panel .btn-sub:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.25);
+    }
+
+    /* =========================
+       프로필 화면
+       ========================= */
+    .profile-wrapper {
+      width: 100%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(218, 220, 224, 0.9);
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        0 1px 3px rgba(60, 64, 67, 0.25);
+      padding: 20px 24px 18px;
+      backdrop-filter: blur(12px);
+      display: none; /* 기본은 숨김, 로그인 후 보여줌 */
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .profile-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .profile-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #e8f0fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a73e8;
+      font-size: 24px;
+      font-weight: 600;
+      border: 2px solid #dadce0;
+    }
+
+    .profile-title-block h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .profile-title-block span {
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .profile-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #e8f0fe;
+      color: #1a73e8;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .profile-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .profile-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .profile-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .profile-field label {
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .profile-field input,
+    .profile-field textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 6px;
+      border: 1px solid #dadce0;
+      background: #ffffff;
+      color: #202124;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .profile-field input[readonly] {
+      background: #f1f3f4;
+      color: #5f6368;
+    }
+
+    .profile-field textarea {
+      resize: vertical;
+      min-height: 70px;
+      max-height: 150px;
+    }
+
+    .profile-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-profile {
+      border-radius: 999px;
+      border: 1px solid #dadce0;
+      padding: 8px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #f8f9fa;
+      color: #3c4043;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.08s;
+      user-select: none;
+    }
+
+    .btn-profile:hover {
+      background: #e8eaed;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-profile:active {
+      transform: translateY(1px) scale(0.98);
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+    }
+
+    .btn-profile.main {
+      background: #1a73e8;
+      color: #ffffff;
+      border-color: #1a73e8;
+      box-shadow: 0 1px 3px rgba(26,115,232,0.5);
+    }
+
+    .btn-profile.main:hover {
+      background: #185abc;
+      box-shadow: 0 2px 5px rgba(26,115,232,0.6);
+    }
+
+    .profile-status {
+      font-size: 11px;
+      color: #188038;
+      min-height: 14px;
+    }
+
+    .profile-subtext {
+      font-size: 11px;
+      color: #80868b;
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 720px) {
+      .auth-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .auth-intro {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 18px;
+      }
+
+      body {
+        padding: 14px;
+      }
+
+      .profile-row-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .auth-intro-top h1 {
+        font-size: 20px;
+      }
+      .auth-wrapper {
+        border-radius: 12px;
+      }
+      .profile-wrapper {
+        border-radius: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 움직이는 배경 영상 -->
+  <div class="video-bg">
+    <video src="https://static.videezy.com/system/resources/previews/000/043/122/original/Luxury_Background_Video.mp4"
+           autoplay
+           muted
+           loop
+           playsinline>
+    </video>
+  </div>
+  <div class="video-overlay"></div>
+
+  <!-- 로그인 / 회원가입 카드 -->
+  <div class="auth-wrapper">
+    <!-- 좌측 인트로 -->
+    <aside class="auth-intro">
+      <div class="auth-intro-top">
+        <div class="logo-row">
+          <div class="logo-mark">
+            <div class="logo-circle">J</div>
+            <div class="logo-dots">
+              <span class="logo-dot blue"></span>
+              <span class="logo-dot red"></span>
+              <span class="logo-dot yellow"></span>
+              <span class="logo-dot green"></span>
+            </div>
+          </div>
+          <div class="logo-text">JAEHO SPACE</div>
+        </div>
+
+        <h1>재호의 메모 서비스</h1>
+        <p>하나의 계정으로 메모, 계획, 운동 기록을 함께 관리해 보세요.</p>
+        <p>여러 기기에서 동일한 계정을 사용하는 것을 가정한 화면입니다.</p>
+
+        <div class="pill">
+          🔒 보안 우선
+          <span>이메일 인증과 안전한 비밀번호를 사용하세요.</span>
+        </div>
+      </div>
+
+      <div class="auth-intro-bottom">
+        <p><strong>안내.</strong> 실제 이메일 발송, 로그인 유지, 비밀번호 재설정은
+          서버(Firebase, Node.js + 메일 서비스 등)와 연동해야 동작합니다.</p>
+        <p>이 화면은 <strong>“구글 스타일 UI + 인증 흐름 연습용”</strong> 예시입니다.<br>
+           나중에 백엔드만 붙이면 바로 실전 서비스로 확장할 수 있습니다.</p>
+      </div>
+    </aside>
+
+    <!-- 우측 폼 -->
+    <main class="auth-main">
+      <!-- 탭 -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-target="loginForm">로그인</button>
+        <button class="auth-tab" data-target="signupForm">회원가입</button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <form id="loginForm" class="active" novalidate>
+        <div class="form-header">
+          <h2>로그인</h2>
+          <p>재호의 메모 서비스 계정으로 로그인하세요.</p>
+        </div>
+
+        <div class="field">
+          <span class="field-label">이메일</span>
+          <div class="input-wrapper">
+            <input type="email" id="loginEmail" placeholder="example@naver.com" required />
+          </div>
+          <div class="error-text" id="loginEmailError"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">비밀번호</span>
+          <div class="input-wrapper">
+            <input type="password" id="loginPassword" placeholder="비밀번호를 입력하세요" minlength="6" required />
+            <button type="button" class="toggle-password" data-target="loginPassword">👁</button>
+          </div>
+          <div class="error-text" id="loginPasswordError"></div>
+        </div>
+
+        <div class="auth-options">
+          <label>
+            <input type="checkbox" id="rememberMe" />
+            <span>로그인 상태 유지</span>
+          </label>
+          <a href="javascript:void(0)" id="openReset">비밀번호 찾기</a>
+        </div>
+
+        <!-- 비밀번호 재설정 패널 -->
+        <div class="reset-panel" id="resetPanel">
+          <div class="hint-text">가입한 이메일로 비밀번호 재설정 링크를 보내는 흐름입니다. (백엔드 연동 필요)</div>
+          <div class="field">
+            <span class="field-label">이메일</span>
+            <div class="input-wrapper">
+              <input type="email" id="resetEmail" placeholder="example@naver.com" />
+            </div>
+            <div class="error-text" id="resetEmailError"></div>
+          </div>
+          <button type="button" class="btn-sub" id="sendResetBtn">재설정 링크 보내기</button>
+          <div class="hint-text" id="resetStatusText"></div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="btn-main" id="loginSubmitBtn">
+            <span class="btn-label">로그인</span>
+            <span class="spinner"></span>
+          </button>
+          <div class="hint-text">아직 계정이 없다면 위의 <strong>회원가입</strong> 탭을 눌러주세요.</div>
+
+          <div class="hint-text" style="margin-top:4px;">또는 소셜 계정으로 로그인</div>
+          <div class="social-row">
+            <button type="button" class="btn-social">🔵 Google</button>
+            <button type="button" class="btn-social">🟢 Kakao</button>
+          </div>
+        </div>
+
+        <div class="small-footer">※ 실제 로그인/비밀번호 재설정은 서버 연동 후 동작합니다.</div>
+      </form>
+
+      <!-- 회원가입 폼 -->
+      <form id="signupForm" novalidate>
+        <div class="form-header">
+          <h2>계정 만들기</h2>
+          <p>재호의 메모 서비스를 사용하려면 계정을 만들어 주세요.</p>
+        </div>
+
+        <div class="field">
+          <span class="field-label">이름 / 닉네임</span>
+          <div class="input-wrapper">
+            <input type="text" id="signupName" placeholder="재호 또는 닉네임" required />
+          </div>
+          <div class="error-text" id="signupNameError"></div>
+        </div>
+
+        <!-- 이메일 + 인증코드 발송 -->
+        <div class="field">
+          <span class="field-label">이메일</span>
+          <div class="verify-row">
+            <div class="input-wrapper" style="flex:1;">
+              <input type="email" id="signupEmail" placeholder="example@gmail.com" required />
+            </div>
+            <button type="button" class="btn-sub" id="requestEmailCodeBtn">인증코드 발송</button>
+          </div>
+          <div class="error-text" id="signupEmailError"></div>
+        </div>
+
+        <!-- 이메일 인증코드 입력 -->
+        <div class="field">
+          <span class="field-label">이메일 인증코드</span>
+          <div class="verify-row">
+            <div class="input-wrapper" style="flex:1;">
+              <input type="text" id="signupEmailCode" placeholder="6자리 인증코드" />
+            </div>
+            <button type="button" class="btn-sub" id="verifyEmailCodeBtn">인증 확인</button>
+          </div>
+          <div class="verify-meta">
+            <span id="emailStatusText" class="hint-text">이메일을 입력하고 인증코드를 발송해주세요.</span>
+            <span id="emailTimer" class="verify-timer"></span>
+          </div>
+          <div class="error-text" id="signupEmailCodeError"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">비밀번호</span>
+          <div class="input-wrapper">
+            <input type="password" id="signupPassword" placeholder="최소 6자 이상" minlength="6" required />
+            <button type="button" class="toggle-password" data-target="signupPassword">👁</button>
+          </div>
+          <div class="error-text" id="signupPasswordError"></div>
+          <!-- 비밀번호 강도 표시 -->
+          <div class="password-strength">
+            <div class="strength-bar-wrapper">
+              <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <span id="strengthText" class="hint-text">비밀번호를 입력하면 강도가 표시됩니다.</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">비밀번호 확인</span>
+          <div class="input-wrapper">
+            <input type="password" id="signupPasswordConfirm" placeholder="다시 한 번 입력" minlength="6" required />
+            <button type="button" class="toggle-password" data-target="signupPasswordConfirm">👁</button>
+          </div>
+          <div class="error-text" id="signupPasswordConfirmError"></div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="btn-main" id="signupSubmitBtn">
+            <span class="btn-label">계정 만들기</span>
+            <span class="spinner"></span>
+          </button>
+          <div class="hint-text">
+            계속하면 <a href="javascript:void(0)">이용약관</a> 및 <a href="javascript:void(0)">개인정보 처리방침</a>에 동의하게 됩니다.
+          </div>
+        </div>
+
+        <div class="small-footer">※ 실제 이메일 인증/회원가입 저장도 서버 연동 후 구현됩니다.</div>
+      </form>
+    </main>
+  </div>
+
+  <!-- 로그인 후 보이는 "내 프로필" 카드 -->
+  <div class="profile-wrapper" id="profileWrapper">
+    <div class="profile-header">
+      <div class="profile-header-left">
+        <div class="profile-avatar" id="profileAvatar">J</div>
+        <div class="profile-title-block">
+          <h2 id="profileTitle">재호님, 환영합니다 👋</h2>
+          <span id="profileSubtitle">내 정보를 수정하고, 메모 서비스에 사용할 기본 프로필을 설정하세요.</span>
+        </div>
+      </div>
+      <div class="profile-badge">
+        👤 내 프로필
+      </div>
+    </div>
+
+    <div class="profile-form">
+      <div class="profile-row-2">
+        <div class="profile-field">
+          <label for="profileName">이름</label>
+          <input type="text" id="profileName" placeholder="실제 이름" />
+        </div>
+        <div class="profile-field">
+          <label for="profileNickname">닉네임</label>
+          <input type="text" id="profileNickname" placeholder="예: 치료하는 개발자" />
+        </div>
+      </div>
+
+      <div class="profile-row-2">
+        <div class="profile-field">
+          <label for="profileEmail">이메일 (계정)</label>
+          <input type="email" id="profileEmail" readonly />
+        </div>
+        <div class="profile-field">
+          <label for="profileGoal">올해 목표</label>
+          <input type="text" id="profileGoal" placeholder="예: AI 자세분석 수업 완성하기" />
+        </div>
+      </div>
+
+      <div class="profile-field">
+        <label for="profileAbout">한 줄 소개 / 자기소개</label>
+        <textarea
+          id="profileAbout"
+          placeholder="예: 물리치료와 AI를 결합한 디지털 헬스케어를 연구하고 있습니다."
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="profile-footer">
+      <div class="profile-status" id="profileStatus"></div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn-profile" id="profileBackToAuthBtn">← 로그인 화면으로</button>
+        <button class="btn-profile" id="profileLogoutBtn">로그아웃</button>
+        <button class="btn-profile main" id="profileSaveBtn">💾 프로필 저장</button>
+      </div>
+    </div>
+
+    <div class="profile-subtext">
+      ※ 데이터는 브라우저 <strong>localStorage</strong>에만 저장됩니다. 실제 서비스에서는 서버/DB에 저장하게 됩니다.
+    </div>
+  </div>
+
+  <script>
+    // ==========================
+    // 공통 키 (localStorage)
+    // ==========================
+    const CURRENT_USER_KEY = "jaeho_current_user";
+    const PROFILE_PREFIX = "jaeho_profile_";
+
+    // ==========================
+    // 탭 전환
+    // ==========================
+    const tabs = document.querySelectorAll(".auth-tab");
+    const forms = {
+      loginForm: document.getElementById("loginForm"),
+      signupForm: document.getElementById("signupForm"),
+    };
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const targetId = tab.dataset.target;
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        Object.values(forms).forEach((f) => f.classList.remove("active"));
+        forms[targetId].classList.add("active");
+        document.querySelectorAll(".error-text").forEach((el) => (el.textContent = ""));
+      });
+    });
+
+    // ==========================
+    // 비밀번호 보기/숨기기
+    // ==========================
+    document.querySelectorAll(".toggle-password").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.dataset.target;
+        const input = document.getElementById(targetId);
+        const type = input.type === "password" ? "text" : "password";
+        input.type = type;
+      });
+    });
+
+    // ==========================
+    // 버튼 클릭 진동(퐁퐁) 효과
+    // ==========================
+    function addPressAnimation(button) {
+      button.classList.remove("pressed");
+      void button.offsetWidth; // 리플로우로 애니메이션 리셋
+      button.classList.add("pressed");
+      setTimeout(() => {
+        button.classList.remove("pressed");
+      }, 180);
+    }
+
+    // ==========================
+    // 이메일 형식 체크
+    // ==========================
+    function isValidEmail(email) {
+      return /\S+@\S+\.\S+/.test(email);
+    }
+
+    // ==========================
+    // 로그인 + 비밀번호 재설정
+    // ==========================
+    const loginFormEl = document.getElementById("loginForm");
+    const openReset = document.getElementById("openReset");
+    const resetPanel = document.getElementById("resetPanel");
+    const resetEmailInput = document.getElementById("resetEmail");
+    const resetEmailError = document.getElementById("resetEmailError");
+    const sendResetBtn = document.getElementById("sendResetBtn");
+    const resetStatusText = document.getElementById("resetStatusText");
+    const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+
+    openReset.addEventListener("click", () => {
+      resetPanel.classList.toggle("active");
+      resetEmailError.textContent = "";
+      resetStatusText.textContent = "";
+      resetEmailInput.value = "";
+    });
+
+    sendResetBtn.addEventListener("click", () => {
+      const email = resetEmailInput.value.trim();
+      resetEmailError.textContent = "";
+      resetStatusText.textContent = "";
+
+      if (!isValidEmail(email)) {
+        resetEmailError.textContent = "올바른 이메일 주소를 입력해주세요.";
+        return;
+      }
+      resetStatusText.textContent = "해당 이메일로 비밀번호 재설정 링크가 발송되었다고 가정합니다. (데모)";
+    });
+
+    loginSubmitBtn.addEventListener("click", () => addPressAnimation(loginSubmitBtn));
+
+    loginFormEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+      const rememberMe = document.getElementById("rememberMe").checked;
+
+      let valid = true;
+
+      const emailError = document.getElementById("loginEmailError");
+      const passwordError = document.getElementById("loginPasswordError");
+      emailError.textContent = "";
+      passwordError.textContent = "";
+
+      if (!isValidEmail(email)) {
+        emailError.textContent = "이메일 형식이 올바르지 않습니다.";
+        valid = false;
+      }
+      if (password.length < 6) {
+        passwordError.textContent = "비밀번호는 최소 6자 이상이어야 합니다.";
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      loginSubmitBtn.classList.add("loading");
+      loginSubmitBtn.disabled = true;
+
+      if (rememberMe) {
+        console.log("로그인 상태 유지 가정 (localStorage 토큰)");
+      } else {
+        console.log("세션 로그인 가정 (sessionStorage 토큰)");
+      }
+
+      // 데모용: 1초 후 "로그인 성공" 처리 + 프로필 화면으로 전환
+      setTimeout(() => {
+        loginSubmitBtn.classList.remove("loading");
+        loginSubmitBtn.disabled = false;
+
+        const nameFromEmail = email.split("@")[0] || "사용자";
+        saveCurrentUser({ email, name: nameFromEmail });
+        showProfileView();
+      }, 1000);
+    });
+
+    // ==========================
+    // 회원가입 + 이메일 인증
+    // ==========================
+    const signupFormEl = document.getElementById("signupForm");
+    const signupSubmitBtn = document.getElementById("signupSubmitBtn");
+
+    const requestEmailCodeBtn = document.getElementById("requestEmailCodeBtn");
+    const verifyEmailCodeBtn = document.getElementById("verifyEmailCodeBtn");
+
+    const signupEmailInput = document.getElementById("signupEmail");
+    const signupEmailError = document.getElementById("signupEmailError");
+    const signupEmailCodeInput = document.getElementById("signupEmailCode");
+    const signupEmailCodeError = document.getElementById("signupEmailCodeError");
+    const emailStatusText = document.getElementById("emailStatusText");
+    const emailTimerEl = document.getElementById("emailTimer");
+
+    let generatedCode = null;
+    let codeExpireAt = null;
+    let timerInterval = null;
+    let isEmailVerified = false;
+
+    function generateCode() {
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+
+    function startTimer() {
+      stopTimer();
+      timerInterval = setInterval(() => {
+        if (!codeExpireAt) {
+          emailTimerEl.textContent = "";
+          return;
+        }
+        const diff = codeExpireAt - Date.now();
+        if (diff <= 0) {
+          emailTimerEl.textContent = "";
+          generatedCode = null;
+          codeExpireAt = null;
+          emailStatusText.textContent = "인증 시간이 만료되었습니다. 다시 요청해주세요.";
+          emailStatusText.className = "hint-text";
+          stopTimer();
+          return;
+        }
+        const totalSec = Math.floor(diff / 1000);
+        const m = String(Math.floor(totalSec / 60)).padStart(2, "0");
+        const s = String(totalSec % 60).padStart(2, "0");
+        emailTimerEl.textContent = `남은 시간 ${m}:${s}`;
+      }, 500);
+    }
+
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    requestEmailCodeBtn.addEventListener("click", () => {
+      signupEmailError.textContent = "";
+      signupEmailCodeError.textContent = "";
+      emailStatusText.textContent = "";
+      emailStatusText.className = "hint-text";
+      emailTimerEl.textContent = "";
+
+      const email = signupEmailInput.value.trim();
+      if (!isValidEmail(email)) {
+        signupEmailError.textContent = "올바른 이메일 주소를 입력해주세요.";
+        return;
+      }
+
+      generatedCode = generateCode();
+      codeExpireAt = Date.now() + 3 * 60 * 1000;
+      isEmailVerified = false;
+      startTimer();
+
+      emailStatusText.textContent = "인증코드가 이메일로 발송되었다고 가정합니다. (데모용)";
+      console.log("개발용 이메일 인증코드:", generatedCode);
+      alert("인증코드가 이메일로 발송되었다고 가정합니다. (연습용 코드: " + generatedCode + ")");
+    });
+
+    verifyEmailCodeBtn.addEventListener("click", () => {
+      signupEmailCodeError.textContent = "";
+
+      if (!generatedCode || !codeExpireAt) {
+        signupEmailCodeError.textContent = "먼저 인증코드를 발송해주세요.";
+        return;
+      }
+      if (Date.now() > codeExpireAt) {
+        signupEmailCodeError.textContent = "인증 시간이 만료되었습니다. 다시 요청해주세요.";
+        return;
+      }
+
+      const inputCode = signupEmailCodeInput.value.trim();
+      if (!inputCode) {
+        signupEmailCodeError.textContent = "인증코드를 입력해주세요.";
+        return;
+      }
+      if (inputCode !== generatedCode) {
+        signupEmailCodeError.textContent = "인증코드가 일치하지 않습니다.";
+        return;
+      }
+
+      isEmailVerified = true;
+      generatedCode = null;
+      codeExpireAt = null;
+      stopTimer();
+      emailTimerEl.textContent = "";
+      emailStatusText.textContent = "✅ 이메일 인증이 완료되었습니다.";
+      emailStatusText.className = "success-text";
+
+      signupEmailInput.readOnly = true;
+      signupEmailCodeInput.readOnly = true;
+    });
+
+    // 비밀번호 강도 체크
+    const signupPasswordInput = document.getElementById("signupPassword");
+    const strengthBar = document.getElementById("strengthBar");
+    const strengthText = document.getElementById("strengthText");
+
+    function evaluatePasswordStrength(pw) {
+      let score = 0;
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[!@#$%^&*(),.?":{}|<>]/.test(pw)) score++;
+      if (/[A-Z]/.test(pw)) score++;
+
+      if (!pw) {
+        return { label: "비밀번호를 입력하면 강도가 표시됩니다.", width: "0%", color: "transparent" };
+      } else if (score <= 1) {
+        return { label: "약함 · 숫자/특수문자를 섞어보세요.", width: "25%", color: "#d93025" };
+      } else if (score <= 3) {
+        return { label: "보통 · 길이를 10자 이상으로 늘리면 좋아요.", width: "60%", color: "#f9ab00" };
+      } else {
+        return { label: "강함 · 좋은 비밀번호입니다!", width: "100%", color: "#188038" };
+      }
+    }
+
+    signupPasswordInput.addEventListener("input", () => {
+      const pw = signupPasswordInput.value;
+      const result = evaluatePasswordStrength(pw);
+      strengthBar.style.width = result.width;
+      strengthBar.style.background = result.color;
+      strengthText.textContent = result.label;
+    });
+
+    signupSubmitBtn.addEventListener("click", () => addPressAnimation(signupSubmitBtn));
+
+    signupFormEl.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("signupName").value.trim();
+      const email = signupEmailInput.value.trim();
+      const password = signupPasswordInput.value.trim();
+      const passwordConfirm = document.getElementById("signupPasswordConfirm").value.trim();
+
+      let valid = true;
+
+      const nameError = document.getElementById("signupNameError");
+      const passwordError = document.getElementById("signupPasswordError");
+      const passwordConfirmError = document.getElementById("signupPasswordConfirmError");
+
+      [nameError, signupEmailError, passwordError, passwordConfirmError, signupEmailCodeError]
+        .forEach(el => el.textContent = "");
+
+      if (!name) {
+        nameError.textContent = "이름 또는 닉네임을 입력해주세요.";
+        valid = false;
+      }
+      if (!isValidEmail(email)) {
+        signupEmailError.textContent = "이메일 형식이 올바르지 않습니다.";
+        valid = false;
+      }
+      if (!isEmailVerified) {
+        signupEmailCodeError.textContent = "이메일 인증을 완료해주세요.";
+        valid = false;
+      }
+      if (password.length < 6) {
+        passwordError.textContent = "비밀번호는 최소 6자 이상이어야 합니다.";
+        valid = false;
+      }
+      if (password !== passwordConfirm) {
+        passwordConfirmError.textContent = "비밀번호가 일치하지 않습니다.";
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      signupSubmitBtn.classList.add("loading");
+      signupSubmitBtn.disabled = true;
+
+      // 데모용: 1.2초 후 회원가입 성공 처리 + 프로필로 진입
+      setTimeout(() => {
+        signupSubmitBtn.classList.remove("loading");
+        signupSubmitBtn.disabled = false;
+
+        saveCurrentUser({ email, name });
+        showProfileView();
+      }, 1200);
+    });
+
+    // ==========================
+    // 프로필 화면 관련 로직
+    // ==========================
+    const authWrapper = document.querySelector(".auth-wrapper");
+    const profileWrapper = document.getElementById("profileWrapper");
+
+    const profileAvatar = document.getElementById("profileAvatar");
+    const profileTitle = document.getElementById("profileTitle");
+    const profileNameInput = document.getElementById("profileName");
+    const profileNicknameInput = document.getElementById("profileNickname");
+    const profileEmailInput = document.getElementById("profileEmail");
+    const profileGoalInput = document.getElementById("profileGoal");
+    const profileAboutInput = document.getElementById("profileAbout");
+    const profileStatus = document.getElementById("profileStatus");
+
+    const profileSaveBtn = document.getElementById("profileSaveBtn");
+    const profileLogoutBtn = document.getElementById("profileLogoutBtn");
+    const profileBackToAuthBtn = document.getElementById("profileBackToAuthBtn");
+
+    function getCurrentUser() {
+      const raw = localStorage.getItem(CURRENT_USER_KEY);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    function saveCurrentUser(user) {
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    }
+
+    function getProfileKey(email) {
+      return PROFILE_PREFIX + email;
+    }
+
+    function loadProfileFor(email) {
+      const key = getProfileKey(email);
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    function saveProfileFor(email, profile) {
+      const key = getProfileKey(email);
+      localStorage.setItem(key, JSON.stringify(profile));
+    }
+
+    function showAuthView() {
+      authWrapper.style.display = "grid";
+      profileWrapper.style.display = "none";
+      profileStatus.textContent = "";
+    }
+
+    function showProfileView() {
+      const user = getCurrentUser();
+      if (!user) {
+        showAuthView();
+        return;
+      }
+
+      authWrapper.style.display = "none";
+      profileWrapper.style.display = "flex";
+
+      // 기본 값 세팅
+      profileEmailInput.value = user.email || "";
+      const baseName = user.name || user.email?.split("@")[0] || "사용자";
+      profileNameInput.value = baseName;
+      profileNicknameInput.value = baseName;
+      profileAvatar.textContent = (baseName.trim()[0] || "U").toUpperCase();
+      profileTitle.textContent = baseName + "님, 환영합니다 👋";
+
+      // 기존 프로필 로딩
+      const existingProfile = loadProfileFor(user.email);
+      if (existingProfile) {
+        profileNameInput.value = existingProfile.name || baseName;
+        profileNicknameInput.value = existingProfile.nickname || baseName;
+        profileGoalInput.value = existingProfile.goal || "";
+        profileAboutInput.value = existingProfile.about || "";
+      } else {
+        profileGoalInput.value = "";
+        profileAboutInput.value =
+          "물리치료와 디지털 헬스케어, 그리고 코딩을 함께 성장시키는 중입니다.";
+      }
+
+      profileStatus.textContent = "";
+    }
+
+    profileSaveBtn.addEventListener("click", () => {
+      const user = getCurrentUser();
+      if (!user) {
+        alert("로그인이 필요합니다.");
+        showAuthView();
+        return;
+      }
+
+      const profile = {
+        name: profileNameInput.value.trim() || user.name || "",
+        nickname: profileNicknameInput.value.trim() || "",
+        email: user.email,
+        goal: profileGoalInput.value.trim(),
+        about: profileAboutInput.value.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      saveProfileFor(user.email, profile);
+
+      // 이름/닉네임이 바뀌면 current_user에도 반영
+      if (profile.name) {
+        saveCurrentUser({ ...user, name: profile.name });
+      }
+
+      profileStatus.textContent = "✅ 프로필이 저장되었습니다. (브라우저에만 저장)";
+      setTimeout(() => {
+        profileStatus.textContent = "";
+      }, 2500);
+    });
+
+    profileLogoutBtn.addEventListener("click", () => {
+      localStorage.removeItem(CURRENT_USER_KEY);
+      showAuthView();
+    });
+
+    profileBackToAuthBtn.addEventListener("click", () => {
+      showAuthView();
+    });
+
+    // 페이지 로드 시, 이미 로그인된 사용자 있으면 바로 프로필 화면으로
+    window.addEventListener("load", () => {
+      const user = getCurrentUser();
+      if (user) {
+        showProfileView();
+      } else {
+        showAuthView();
+      }
+    });
+  </script>
+</body>
+</html>
